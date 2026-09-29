@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản Lý Bộ Môn - FIT Topic Manager</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="app-layout">
+        <!-- SIDEBAR MENU BÊN TRÁI -->
+        <aside class="sidebar">
+            <div class="sidebar-brand">
+                <div class="sidebar-brand-icon">🎓</div>
+                <div class="sidebar-brand-text">
+                    FIT Topic<br>
+                    <small style="font-size: 11px; color: #94a3b8; font-weight: normal;">Quản Lý Đề Tài</small>
+                </div>
+            </div>
+
+            <ul class="sidebar-menu">
+                <li class="sidebar-menu-item">
+                    <a href="users.html">
+                        <span>👥</span> Quản Lý Người Dùng
+                    </a>
+                </li>
+                <li class="sidebar-menu-item active">
+                    <a href="departments.html">
+                        <span>🏢</span> Quản Lý Bộ Môn
+                    </a>
+                </li>
+                <li class="sidebar-menu-item">
+                    <a href="registration-periods.html">
+                        <span>📅</span> Đợt Đăng Ký Đề Tài
+                    </a>
+                </li>
+                <li class="sidebar-menu-item">
+                    <a href="profile.html">
+                        <span>👤</span> Trang Cá Nhân
+                    </a>
+                </li>
+            </ul>
+
+            <div class="sidebar-footer">
+                <a href="#" onclick="logout()" style="color: #f87171; text-decoration: none; font-size: 14px; font-weight: 500; display: flex; align-items: center; gap: 10px; padding: 8px 12px;">
+                    <span>🚪</span> Đăng Xuất
+                </a>
+            </div>
+        </aside>
+
+        <!-- NỘI DUNG CHÍNH BÊN PHẢI -->
+        <main class="main-wrapper">
+            <div class="page-header" style="margin-bottom: 24px;">
+                <div class="page-title">
+                    <h1 style="font-size: 24px; color: #0f172a; margin-bottom: 4px;">Quản Lý Bộ Môn</h1>
+                    <p style="color: #64748b; font-size: 14px;">Danh sách các bộ môn trong khoa CNTT</p>
+                </div>
+                <div class="header-actions">
+                    <button onclick="openCreateDeptModal()" class="btn btn-primary">
+                        <span>+</span> Tạo bộ môn mới
+                    </button>
+                </div>
+            </div>
+
+            <div class="table-card">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>MÃ BỘ MÔN</th>
+                            <th>TÊN BỘ MÔN</th>
+                            <th>MÔ TẢ</th>
+                            <th>TRƯỞNG BỘ MÔN</th>
+                            <th>NGÀY TẠO</th>
+                            <th style="text-align: right;">THAO TÁC</th>
+                        </tr>
+                    </thead>
+                    <tbody id="deptTableBody">
+                        <tr>
+                            <td colspan="7" style="text-align: center; color: #94a3b8; padding: 40px;">Đang tải dữ liệu bộ môn...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+
+    <!-- MODAL TẠO BỘ MÔN -->
+    <div id="createDeptModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Tạo Bộ Môn Mới</h3>
+            </div>
+            <form id="createDeptForm">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Mã bộ môn (*)</label>
+                        <input type="text" id="createDeptCode" placeholder="VD: CNPM" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Tên bộ môn (*)</label>
+                        <input type="text" id="createDeptName" placeholder="VD: Công nghệ phần mềm" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Mô tả</label>
+                    <textarea id="createDeptDesc" rows="3" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px;" placeholder="Mô tả ngành/bộ môn..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>ID Trưởng bộ môn (Nếu có)</label>
+                    <input type="number" id="createHeadLecturerId" placeholder="VD: 3">
+                </div>
+
+                <div style="display: flex; gap: 8px; justify-content: flex-end; margin-top: 16px;">
+                    <button type="button" onclick="closeModal('createDeptModal')" class="btn btn-secondary">Hủy</button>
+                    <button type="submit" class="btn btn-primary">Tạo Mới</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL SỬA BỘ MÔN -->
+    <div id="editDeptModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Cập Nhật Bộ Môn</h3>
+            </div>
+            <form id="editDeptForm">
+                <input type="hidden" id="editDeptId">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Mã bộ môn (*)</label>
+                        <input type="text" id="editDeptCode" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Tên bộ môn (*)</label>
+                        <input type="text" id="editDeptName" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Mô tả</label>
+                    <textarea id="editDeptDesc" rows="3" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px;"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>ID Trưởng bộ môn</label>
+                    <input type="number" id="editHeadLecturerId">
+                </div>
+
+                <div style="display: flex; gap: 8px; justify-content: flex-end; margin-top: 16px;">
+                    <button type="button" onclick="closeModal('editDeptModal')" class="btn btn-secondary">Hủy</button>
+                    <button type="submit" class="btn btn-primary">Lưu Thay Đổi</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="js/mock-api.js"></script>
+    <script src="js/departments.js"></script>
+</body>
+</html>

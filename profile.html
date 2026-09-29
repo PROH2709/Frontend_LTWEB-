@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trang Cá Nhân - FIT Topic Manager</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="app-layout">
+        <!-- SIDEBAR MENU BÊN TRÁI -->
+        <aside class="sidebar">
+            <div class="sidebar-brand">
+                <div class="sidebar-brand-icon">🎓</div>
+                <div class="sidebar-brand-text">
+                    FIT Topic<br>
+                    <small style="font-size: 11px; color: #94a3b8; font-weight: normal;">Quản Lý Đề Tài</small>
+                </div>
+            </div>
+
+            <ul class="sidebar-menu">
+                <li class="sidebar-menu-item">
+                    <a href="users.html">
+                        <span>👥</span> Quản Lý Người Dùng
+                    </a>
+                </li>
+                <li class="sidebar-menu-item">
+                    <a href="departments.html">
+                        <span>🏢</span> Quản Lý Bộ Môn
+                    </a>
+                </li>
+                <li class="sidebar-menu-item">
+                    <a href="registration-periods.html">
+                        <span>📅</span> Đợt Đăng Ký Đề Tài
+                    </a>
+                </li>
+                <li class="sidebar-menu-item active">
+                    <a href="profile.html">
+                        <span>👤</span> Trang Cá Nhân
+                    </a>
+                </li>
+            </ul>
+
+            <div class="sidebar-footer">
+                <a href="#" onclick="logout()" style="color: #f87171; text-decoration: none; font-size: 14px; font-weight: 500; display: flex; align-items: center; gap: 10px; padding: 8px 12px;">
+                    <span>🚪</span> Đăng Xuất
+                </a>
+            </div>
+        </aside>
+
+        <!-- NỘI DUNG CHÍNH BÊN PHẢI -->
+        <main class="main-wrapper">
+            <div class="page-header" style="margin-bottom: 24px;">
+                <div class="page-title">
+                    <h1 style="font-size: 24px; color: #0f172a; margin-bottom: 4px;">Thông Tin Cá Nhân</h1>
+                    <p style="color: #64748b; font-size: 14px;">Quản lý thông tin tài khoản đang đăng nhập</p>
+                </div>
+                <div class="header-actions">
+                    <button onclick="openPasswordModal()" class="btn btn-primary">
+                        🔑 Đổi mật khẩu
+                    </button>
+                </div>
+            </div>
+
+            <div style="background: white; border-radius: 12px; padding: 32px; border: 1px solid #e2e8f0; max-width: 800px;">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div>
+                        <span style="color: #64748b; font-size: 13px;">Họ và Tên</span>
+                        <p id="profFullName" style="font-size: 16px; font-weight: 600; color: #0f172a; margin-top: 4px;">-</p>
+                    </div>
+                    <div>
+                        <span style="color: #64748b; font-size: 13px;">Tên Đăng Nhập</span>
+                        <p id="profUsername" style="font-size: 16px; font-weight: 600; color: #0f172a; margin-top: 4px;">-</p>
+                    </div>
+                    <div>
+                        <span style="color: #64748b; font-size: 13px;">Mã Sinh Viên / Giảng Viên</span>
+                        <p id="profCode" style="font-size: 16px; font-weight: 600; color: #0f172a; margin-top: 4px;">-</p>
+                    </div>
+                    <div>
+                        <span style="color: #64748b; font-size: 13px;">Vai Trò</span>
+                        <p id="profRole" style="font-size: 16px; font-weight: 600; color: #4f46e5; margin-top: 4px;">-</p>
+                    </div>
+                    <div>
+                        <span style="color: #64748b; font-size: 13px;">Email</span>
+                        <p id="profEmail" style="font-size: 16px; font-weight: 600; color: #0f172a; margin-top: 4px;">-</p>
+                    </div>
+                    <div>
+                        <span style="color: #64748b; font-size: 13px;">Số Điện Thoại</span>
+                        <p id="profPhone" style="font-size: 16px; font-weight: 600; color: #0f172a; margin-top: 4px;">-</p>
+                    </div>
+                    <div>
+                        <span style="color: #64748b; font-size: 13px;">Bộ Môn</span>
+                        <p id="profDept" style="font-size: 16px; font-weight: 600; color: #0f172a; margin-top: 4px;">-</p>
+                    </div>
+                    <div>
+                        <span style="color: #64748b; font-size: 13px;">Lớp Sinh Viên</span>
+                        <p id="profClass" style="font-size: 16px; font-weight: 600; color: #0f172a; margin-top: 4px;">-</p>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- MODAL ĐỔI MẬT KHẨU -->
+    <div id="passwordModal" class="modal">
+        <div class="modal-content" style="max-width: 400px;">
+            <div class="modal-header">
+                <h3>Đổi Mật Khẩu</h3>
+            </div>
+            <form id="changePasswordForm">
+                <div class="form-group" style="margin-bottom: 16px;">
+                    <label>Mật khẩu cũ (*)</label>
+                    <input type="password" id="oldPassword" required>
+                </div>
+                <div class="form-group" style="margin-bottom: 20px;">
+                    <label>Mật khẩu mới (*)</label>
+                    <input type="password" id="newPassword" required>
+                </div>
+                <div style="display: flex; gap: 8px; justify-content: flex-end;">
+                    <button type="button" onclick="closePasswordModal()" class="btn btn-secondary">Hủy</button>
+                    <button type="submit" class="btn btn-primary">Xác Nhận Đổi</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="js/mock-api.js"></script>
+    <script src="js/auth.js"></script>
+</body>
+</html>
