@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nhóm Sinh Viên - FIT Topic Manager</title>
+    <link rel="stylesheet" href="css/style.css">
+
+    <!-- Chỉ phần riêng của trang nhóm (badge, khối thông tin). Class bắt đầu bằng "grp-" nên không đụng trang khác.
+         Nếu muốn, chuyển sang css/style.css sau. -->
+    <style>
+        .grp-info { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px 24px; margin: 0; }
+        .grp-info dt { font-size: 12px; color: #64748b; margin-bottom: 2px; font-weight: 600; }
+        .grp-info dd { margin: 0; color: #0f172a; font-weight: 600; font-size: 15px; }
+
+        .grp-badge { display: inline-block; padding: 2px 10px; border-radius: 999px; font-size: 12px; font-weight: 600; }
+        .grp-badge-leader { background: #eef2ff; color: #4f46e5; }
+        .grp-badge-member { background: #f1f5f9; color: #64748b; }
+        .grp-badge-ok { background: #f0fdf4; color: #15803d; }
+        .grp-badge-warn { background: #fffbeb; color: #b45309; }
+
+        .grp-section-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 16px; }
+        .grp-section-head h3 { margin: 0; font-size: 16px; color: #0f172a; }
+        .grp-card-body { padding: 20px 24px; }
+        .grp-hint { font-size: 13px; color: #64748b; margin-top: 10px; }
+        .grp-form-inline { display: flex; gap: 12px; align-items: flex-end; flex-wrap: wrap; }
+        .grp-form-inline .form-group { flex: 1; min-width: 220px; margin-bottom: 0; }
+        .grp-empty { text-align: center; padding: 32px 16px; color: #94a3b8; }
+        .grp-empty p { margin-bottom: 16px; }
+        .grp-hidden { display: none; }
+    </style>
+</head>
+<body>
+    <div class="app-layout">
+        <!-- SIDEBAR MENU BÊN TRÁI (giống users.html, thêm mục "Nhóm Của Tôi") -->
+        <aside class="sidebar">
+            <div class="sidebar-brand">
+                <div class="sidebar-brand-icon">🎓</div>
+                <div class="sidebar-brand-text">
+                    FIT Topic<br>
+                    <small style="font-size: 11px; color: #94a3b8; font-weight: normal;">Quản Lý Đề Tài</small>
+                </div>
+            </div>
+
+            <ul class="sidebar-menu">
+                <li class="sidebar-menu-item">
+                    <a href="users.html">
+                        <span>👥</span> Quản Lý Người Dùng
+                    </a>
+                </li>
+                <li class="sidebar-menu-item">
+                    <a href="departments.html">
+                        <span>🏢</span> Quản Lý Bộ Môn
+                    </a>
+                </li>
+                <li class="sidebar-menu-item">
+                    <a href="registration-periods.html">
+                        <span>📅</span> Đợt Đăng Ký Đề Tài
+                    </a>
+                </li>
+                <li class="sidebar-menu-item active">
+                    <a href="groups.html">
+                        <span>🤝</span> Nhóm Của Tôi
+                    </a>
+                </li>
+                <li class="sidebar-menu-item">
+                    <a href="profile.html">
+                        <span>👤</span> Trang Cá Nhân
+                    </a>
+                </li>
+            </ul>
+
+            <div class="sidebar-footer">
+                <a href="#" onclick="logout()" style="color: #f87171; text-decoration: none; font-size: 14px; font-weight: 500; display: flex; align-items: center; gap: 10px; padding: 8px 12px;">
+                    <span>🚪</span> Đăng Xuất
+                </a>
+            </div>
+        </aside>
+
+        <!-- NỘI DUNG CHÍNH BÊN PHẢI -->
+        <main class="main-wrapper">
+            <!-- Header trang -->
+            <div class="page-header" style="margin-bottom: 24px;">
+                <div class="page-title">
+                    <h1 style="font-size: 24px; color: #0f172a; margin-bottom: 4px;">Nhóm Của Tôi</h1>
+                    <p style="color: #64748b; font-size: 14px;">Quản lý thành viên, đăng ký đề tài và nộp báo cáo của nhóm</p>
+                </div>
+            </div>
+
+            <!-- CHƯA CÓ NHÓM: GET /api/groups/my-group chưa trả về nhóm -->
+            <div class="table-card grp-hidden" id="noGroupState" style="margin-bottom: 24px;">
+                <div class="grp-empty">
+                    <p>Bạn chưa thuộc nhóm nào trong đợt đăng ký này.</p>
+                    <button type="button" class="btn btn-primary" data-action="show-create-group">+ Tạo nhóm mới</button>
+                </div>
+            </div>
+
+            <!-- FORM TẠO NHÓM: POST /api/groups -->
+            <div class="table-card grp-hidden" id="createGroupCard" style="margin-bottom: 24px;">
+                <div class="grp-card-body">
+                    <div class="grp-section-head"><h3>Tạo nhóm mới</h3></div>
+                    <form id="createGroupForm">
+                        <div class="grp-form-inline">
+                            <div class="form-group">
+                                <label>Tên nhóm (*)</label>
+                                <input type="text" id="createGroupName" placeholder="Ví dụ: Nhóm 5 - Quản lý đề tài" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Tạo nhóm</button>
+                        </div>
+                        <p class="grp-hint">Người tạo nhóm sẽ là nhóm trưởng.</p>
+                    </form>
+                </div>
+            </div>
+
+            <!-- ===== KHI ĐÃ CÓ NHÓM ===== -->
+            <div id="groupContent">
+
+                <!-- THÔNG TIN NHÓM: GET /api/groups/my-group -->
+                <div class="table-card" style="margin-bottom: 24px;">
+                    <div class="grp-card-body">
+                        <div class="grp-section-head">
+                            <h3>Thông tin nhóm</h3>
+                            <span class="grp-badge grp-badge-ok" id="groupStatus">Đang hoạt động</span>
+                        </div>
+                        <dl class="grp-info">
+                            <div><dt>TÊN NHÓM</dt><dd id="groupNameText">Nhóm 5 - Quản lý đề tài</dd></div>
+                            <div><dt>NHÓM TRƯỞNG</dt><dd id="groupLeaderText">Nguyễn Văn A</dd></div>
+                            <div><dt>SỐ THÀNH VIÊN</dt><dd id="groupCountText">2 / 3</dd></div>
+                            <div><dt>ĐỢT ĐĂNG KÝ</dt><dd id="groupPeriodText">Học kỳ 1 - 2026</dd></div>
+                        </dl>
+                    </div>
+                </div>
+
+                <!-- THÀNH VIÊN: thêm POST /api/groups/{id}/members, xóa DELETE /api/groups/{id}/members/{studentId} -->
+                <div class="table-card" style="margin-bottom: 24px;">
+                    <div class="grp-card-body" style="padding-bottom: 0;">
+                        <div class="grp-section-head"><h3>Thành viên</h3></div>
+                    </div>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>MÃ SV</th>
+                                <th>HỌ VÀ TÊN</th>
+                                <th>EMAIL</th>
+                                <th>VAI TRÒ</th>
+                                <th style="text-align: right;">THAO TÁC</th>
+                            </tr>
+                        </thead>
+                        <tbody id="memberTableBody">
+                            <tr data-student-id="1">
+                                <td>SV001</td>
+                                <td>Nguyễn Văn A</td>
+                                <td>a@example.com</td>
+                                <td><span class="grp-badge grp-badge-leader">Nhóm trưởng</span></td>
+                                <td style="text-align: right;"></td>
+                            </tr>
+                            <tr data-student-id="2">
+                                <td>SV002</td>
+                                <td>Trần Thị B</td>
+                                <td>b@example.com</td>
+                                <td><span class="grp-badge grp-badge-member">Thành viên</span></td>
+                                <td style="text-align: right;">
+                                    <!-- Chỉ nhóm trưởng mới thấy nút này -->
+                                    <button type="button" class="btn btn-secondary" style="color: #dc2626;"
+                                            data-action="remove-member" data-student-id="2">Xóa khỏi nhóm</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <!-- Chỉ nhóm trưởng thấy form này, ẩn khi đủ 3 thành viên -->
+                    <div class="grp-card-body">
+                        <form id="addMemberForm">
+                            <div class="grp-form-inline">
+                                <div class="form-group">
+                                    <label>Thêm thành viên</label>
+                                    <input type="text" id="addMemberCode" placeholder="Nhập mã sinh viên" required>
+                                </div>
+                                <button type="submit" class="btn btn-primary">Thêm vào nhóm</button>
+                            </div>
+                            <p class="grp-hint">Mỗi nhóm có tối đa 3 thành viên.</p>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- ĐỀ TÀI: POST /api/groups/{id}/register-topic, DELETE /api/groups/{id}/cancel-topic -->
+                <div class="table-card" style="margin-bottom: 24px;">
+                    <div class="grp-card-body">
+                        <div class="grp-section-head">
+                            <h3>Đề tài</h3>
+                            <span class="grp-badge grp-badge-warn" id="topicStatus">Chưa đăng ký</span>
+                        </div>
+
+                        <!-- Khi chưa đăng ký đề tài -->
+                        <form id="registerTopicForm">
+                            <div class="grp-form-inline">
+                                <div class="form-group">
+                                    <label>Chọn đề tài (*)</label>
+                                    <select id="topicSelect" required>
+                                        <option value="">-- Chọn đề tài --</option>
+                                        <option value="1">Hệ thống quản lý đề tài</option>
+                                        <option value="2">Website đặt sân cầu lông</option>
+                                    </select>
+                                </div>
+                                <button type="submit" class="btn btn-primary">Đăng ký đề tài</button>
+                            </div>
+                            <p class="grp-hint">Chỉ đăng ký được trong thời hạn giai đoạn 2.</p>
+                        </form>
+
+                        <!-- Khi đã đăng ký đề tài (hiện thay cho form trên) -->
+                        <div class="grp-hidden" id="registeredTopic">
+                            <dl class="grp-info">
+                                <div><dt>TÊN ĐỀ TÀI</dt><dd id="topicNameText">Hệ thống quản lý đề tài</dd></div>
+                                <div><dt>GIẢNG VIÊN HƯỚNG DẪN</dt><dd id="topicAdvisorText">TS. Lê Văn C</dd></div>
+                            </dl>
+                            <div style="margin-top: 16px;">
+                                <button type="button" class="btn btn-secondary" style="color: #dc2626;" data-action="cancel-topic">Hủy đăng ký đề tài</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- BÁO CÁO: POST /api/groups/{id}/reports -->
+                <div class="table-card">
+                    <div class="grp-card-body">
+                        <div class="grp-section-head"><h3>Nộp báo cáo</h3></div>
+                        <form id="reportForm">
+                            <div class="form-group">
+                                <label>Tiêu đề báo cáo (*)</label>
+                                <input type="text" id="reportTitle" placeholder="Ví dụ: Báo cáo tiến độ lần 1" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Nội dung</label>
+                                <textarea id="reportContent" rows="4" placeholder="Tóm tắt công việc đã làm"></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Nộp báo cáo</button>
+                            <p class="grp-hint">Chỉ nhóm trưởng mới nộp được báo cáo.</p>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Giống users.html. Khi làm phần API: thêm <script src="js/groups.js"></script> ở đây -->
+    <script src="js/mock-api.js"></script>
+</body>
+</html>
